@@ -117,16 +117,16 @@ sqlTabelas = '''
     
     DROP TABLE IF EXISTS socio_raw;
     CREATE TABLE socio_raw (
-        cnpj_basico VARCHAR(8)
-        identificador_de_socio VARCHAR(1)
-        nome_socio VARCHAR(200)
-        cnpj_cpf_socio VARCHAR(14)
-        qualificacao_socio VARCHAR(2)
-        data_entrada_sociedade VARCHAR(8)
-        pais VARCHAR(3)
-        representante_legal VARCHAR(11)
-        nome_representante VARCHAR(200)
-        qualificacao_representante_legal VARCHAR(2)
+        cnpj_basico VARCHAR(8),
+        identificador_de_socio VARCHAR(1),
+        nome_socio VARCHAR(200),
+        cnpj_cpf_socio VARCHAR(14),
+        qualificacao_socio VARCHAR(2),
+        data_entrada_sociedade VARCHAR(8),
+        pais VARCHAR(3),
+        representante_legal VARCHAR(11),
+        nome_representante VARCHAR(200),
+        qualificacao_representante_legal VARCHAR(2),
         faixa_etaria VARCHAR(1)
     );
     '''
