@@ -22,14 +22,13 @@ for file in to_unzip:
   with zipfile.ZipFile(file, 'r') as zip_ref:
     zip_ref.extractall(output_folder)
 
-
-
 tableSql = '''
 DROP TABLE IF EXISTS cnae_raw;
 CREATE TABLE cnae_raw (
   codigo VARCHAR(7),
   descricao VARCHAR(200)
 );
+
 DROP TABLE IF EXISTS empresa_raw;
 CREATE TABLE empresa_raw (
   cnpj_basico VARCHAR(8),
@@ -218,8 +217,8 @@ colunas_simples = [
 
 
 def perform_big_table(table_name, file_pattern, columns):
-  fileList = list(glob.glob(os.path.join(output_folder, file_pattern)))
-  for file in fileList:
+  file_list = list(glob.glob(os.path.join(output_folder, file_pattern)))
+  for file in file_list:
     with pd.read_csv(file, sep=';', header=None, names=columns, chunksize=150000, encoding='latin1', dtype=str, na_filter=None) as reader:
       for chunk in reader:
         chunk.to_sql(table_name, engine, index=None, if_exists='append', method='multi', chunksize=500, dtype=sqlalchemy.sql.sqltypes.TEXT)
