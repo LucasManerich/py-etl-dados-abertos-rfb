@@ -23,6 +23,7 @@ for file in to_unzip:
     zip_ref.extractall(output_folder)
 
 
+
 tableSql = '''
 DROP TABLE IF EXISTS cnae_raw;
 CREATE TABLE cnae_raw (
