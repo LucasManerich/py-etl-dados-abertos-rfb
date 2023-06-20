@@ -4,25 +4,28 @@ import os
 import zipfile
 import pandas as pd
 import sqlalchemy
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # %% DEFINA os parâmetros do servidor.
-dbname = 'trebiico_w7cnpj_producao'
-username = 'trebiico_w7cnpj'
-password = 'xxxxx'
-host = 'localhost'
+dbname = os.getenv('DB_NAME')
+username = os.getenv('DB_USER')
+password = os.getenv('DB_PASS')
+host = os.getenv('DB_HOST')
 
-zip_folder = r"dados-publicos-zip"
-output_folder = r"dados-publicos"
+ZIP_FOLDER = r"dados-publicos-zip"
+OUTPUT_FOLDER = r"dados-publicos"
 
 engine = sqlalchemy.create_engine(f'mysql+pymysql://{username}:{password}@{host}/{dbname}')
-to_unzip = list(glob.glob(os.path.join(zip_folder,r'*.zip')))
+to_unzip = list(glob.glob(os.path.join(ZIP_FOLDER,r'*.zip')))
 
 for file in to_unzip:
   print('Descompactando o arquivo: ' + file)
   with zipfile.ZipFile(file, 'r') as zip_ref:
-    zip_ref.extractall(output_folder)
+    zip_ref.extractall(OUTPUT_FOLDER)
 
-tableSql = '''
+TABLE_SQL = '''
 DROP TABLE IF EXISTS cnae_raw;
 CREATE TABLE cnae_raw (
   codigo VARCHAR(7),
@@ -39,6 +42,8 @@ CREATE TABLE empresa_raw (
   porte_empresa VARCHAR(2),
   ente_federativo_responsavel VARCHAR(50)
 );
+ALTER TABLE empresa_raw ADD INDEX idx_empresa_raw_cnpj_basico (cnpj_basico) USING BTREE;
+ALTER TABLE empresa_raw ADD FULLTEXT idx_empresa_raw_razao_social (razao_social);
 
 DROP TABLE IF EXISTS estabelecimento_raw;
 CREATE TABLE estabelecimento_raw (
@@ -73,12 +78,17 @@ CREATE TABLE estabelecimento_raw (
   situacao_especial VARCHAR(200),
   data_situacao_especial VARCHAR(8)
 );
+ALTER TABLE estabelecimento_raw ADD INDEX idx_estabelecimento_raw_uf (uf) USING BTREE;
+ALTER TABLE estabelecimento_raw ADD INDEX idx_estabelecimento_raw_municipio (municipio) USING BTREE;
+ALTER TABLE estabelecimento_raw ADD INDEX idx_estabelecimento_raw_cnpj_basico (cnpj_basico) USING BTREE;
+ALTER TABLE estabelecimento_raw ADD FULLTEXT idx_estabelecimento_raw_nome_fantasia (nome_fantasia);
 
 DROP TABLE IF EXISTS motivo_raw;
 CREATE TABLE motivo_raw (
   codigo VARCHAR(2),
   descricao VARCHAR(200)
 );
+
 DROP TABLE IF EXISTS municipio_raw;
 CREATE TABLE municipio_raw (
   codigo VARCHAR(4),
@@ -128,16 +138,17 @@ CREATE TABLE socio_raw (
   qualificacao_representante_legal VARCHAR(2),
   faixa_etaria VARCHAR(1)
 );
+ALTER TABLE socio_raw ADD INDEX idx_socio_raw_cnpj_basico (cnpj_basico) USING BTREE;
 '''
 
-for k, sql in enumerate(tableSql.split(';')):
+for k, sql in enumerate(TABLE_SQL.split(';')):
   if not sql.strip():
     continue
   engine.execute(sql)
 
 
 def perform_small_table(file_pattern, table_name):
-  file = list(glob.glob(os.path.join(output_folder, file_pattern)))[0]
+  file = list(glob.glob(os.path.join(OUTPUT_FOLDER, file_pattern)))[0]
   dtab = pd.read_csv(file, dtype=str, sep=';', encoding='latin1', header=None, names=['codigo','descricao'])
   dtab.to_sql(table_name, engine, if_exists='append', index=None)
 
@@ -217,7 +228,7 @@ colunas_simples = [
 
 
 def perform_big_table(table_name, file_pattern, columns):
-  file_list = list(glob.glob(os.path.join(output_folder, file_pattern)))
+  file_list = list(glob.glob(os.path.join(OUTPUT_FOLDER, file_pattern)))
   for file in file_list:
     with pd.read_csv(file, sep=';', header=None, names=columns, chunksize=150000, encoding='latin1', dtype=str, na_filter=None) as reader:
       for chunk in reader:

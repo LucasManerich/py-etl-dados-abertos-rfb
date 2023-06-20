@@ -4,3 +4,4 @@ requests
 SQLAlchemy==1.4.47
 wget
 pymysql
+python-dotenv

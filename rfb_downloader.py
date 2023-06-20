@@ -1,15 +1,15 @@
 from bs4 import BeautifulSoup
 import requests, wget, os, sys, time, glob
 
-url = 'http://200.152.38.155/CNPJ/'
+URL = 'http://200.152.38.155/CNPJ/'
 
-zip_folder = r"dados-publicos-zip"
+ZIP_FOLDER = r"dados-publicos-zip"
 
 if len(glob.glob(os.path.join(vars,'*.zip'))):
-  print(f'Há arquivos zip na pasta {zip_folder}. Apague ou mova esses arquivos zip e tente novamente')
+  print(f'Há arquivos zip na pasta {ZIP_FOLDER}. Apague ou mova esses arquivos zip e tente novamente')
   sys.exit()
        
-page = requests.get(url)    
+page = requests.get(URL)    
 data = page.text
 soup = BeautifulSoup(data)
 lista = []
@@ -18,8 +18,8 @@ for link in soup.find_all('a'):
   if str(link.get('href')).endswith('.zip'): 
     cam = link.get('href')
     if not cam.startswith('http'):
-      print(url+cam)
-      lista.append(url+cam)
+      print(URL+cam)
+      lista.append(URL+cam)
     else:
       print(cam)
       lista.append(cam)
@@ -36,6 +36,6 @@ def bar_progress(current, total):
   sys.stdout.flush()
   
 for k, url in enumerate(lista):
-  wget.download(url, out=os.path.join(zip_folder, os.path.split(url)[1]), bar=bar_progress)
+  wget.download(url, out=os.path.join(ZIP_FOLDER, os.path.split(url)[1]), bar=bar_progress)
     
 print('\n\n'+ time.asctime() + f' Finalizado: baixados {len(lista)} arquivos.')
