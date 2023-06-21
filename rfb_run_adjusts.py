@@ -45,6 +45,7 @@ JOIN municipio_raw ON municipio_raw.codigo = origem_municipios.codigo_municipio;
 INSERT INTO qtd_estabelecimento_uf (quantidade, uf) 
 SELECT count(1) as quantidade, uf FROM estabelecimento_raw GROUP BY uf;
 
+DROP TABLE IF EXISTS referencia_ultima_carga;
 CREATE TABLE referencia_ultima_carga (data_hora TIMESTAMP);
 INSERT INTO referencia_ultima_carga VALUES (CURRENT_TIMESTAMP);
 '''
